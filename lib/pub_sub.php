@@ -1,66 +1,144 @@
 <?php
 
 class PubSub {
-  
+
   private static $events = array();
-  
+
   /**
    * Get all events that have been subscribed to
    *
-   * @return array
+   * @param string $event
+   * @param int $priority
+   * @return array of callbacks, in order of execution priority
    * @author Baylor Rae'
    */
-  public static function events() {
-    return self::$events;
+  public static function events($event = null, $priority = null) {
+    $events = array();
+
+    // return all hooks for all hook names
+    if (null === $event) {
+      foreach (array_keys(self::$events) as $event) {
+        foreach (self::events($event) as $callback) {
+          $events[$event][] = $callback;
+        }
+      }
+      return $events;
+    }
+
+    if (!isset(self::$events[$event])) {
+      return array();
+    }
+
+    // return all hooks for a given name
+    if (null === $priority) {
+      ksort(self::$events[$event]);
+      foreach (self::$events[$event] as &$callbacks) {
+        foreach ($callbacks as $callback) {
+          $events[] = $callback;
+        }
+      }
+      return $events;
+    }
+
+    // return only hooks for given name and priority
+    if (!isset(self::$events[$event][$priority])) {
+      return array();
+    }
+    return array_values(self::$events[$event][$priority]);
   }
 
   /**
    * Add a new event subscription
-   * 
-   * throws InvalidArgumentException if callback isn't callable
    *
-   * @param string $event 
-   * @param callback $callback 
+   * @param string $event
+   * @param callback $callback
+   * @param int $priority
+   * @throws InvalidArgumentException
    * @return void
    * @author Baylor Rae'
    */
-  public static function subscribe($event, $callback) {
-    if( !is_callable($callback) ) {
-      throw new InvalidArgumentException();
+  public static function subscribe($event, $callback, $priority = 100) {
+    if (!is_callable($callback)) {
+      throw new InvalidArgumentException('Callback "' . print_r($callback, true) . '" is not callable. ');
     }
-    
-    if( empty(self::$events[$event]) ) {
+
+    if (!isset(self::$events[$event])) {
       self::$events[$event] = array();
     }
-    
-    array_push(self::$events[$event], $callback);
+
+    self::$events[$event][$priority][self::getCallbackHash($callback)] = $callback;
   }
-  
+
   /**
-   * Call all subscriptions within an event
+   * Call all subscriptions for the given event
    *
-   * @param string $event 
-   * @param mixed *$params 
-   * @return void
+   * @param string $event
+   * @param mixed $arg1
+   * @return boolean
    * @author Baylor Rae'
    */
-  public static function publish($event, $params = '') {
-    $events = self::events();
+  public static function publish($event, $arg1 = null) {
+    $events = self::events($event);
     $params = func_get_args();
     array_shift($params);
-    
-    foreach( $events[$event] as $event ) {
-      call_user_func_array($event, $params);
+
+    foreach ($events as $callback) {
+      if (call_user_func_array($callback, $params) === false) {
+        return false;
+      }
     }
   }
-  
-  public static function unsubscribe($event) {
-    self::$events[$event] = array();
+
+  /**
+   * Removes a callback for the given $hook_name
+   * @param string $event
+   * @param callback $callback
+   * @param int $priority
+   */
+  public static function unsubscribe($event = null, $callback = null, $priority = null) {
+    if (null === $event) {
+      self::$events = array();
+      return;
+    }
+
+    if (!isset(self::$events[$event])) {
+      return;
+    }
+
+    if (null === $callback) {
+      // remove all callbacks for this hook name
+      if (null === $priority) {
+        unset(self::$events[$event]);
+        return;
+      }
+      // remove all callbacks for this hook name for specific priority
+      unset(self::$events[$event][$priority]);
+      return;
+    }
+
+    $id = self::getCallbackHash($callback);
+
+    // remove all callbacks for specific hook at specific priority level
+    if (null !== $callback && null !== $priority) {
+      unset(self::$events[$event][$priority][$id]);
+      return;
+    }
+
+    // remove all callbacks for specific hook at all priority levels
+    foreach (self::$events[$event] as $priority => &$callbacks) {
+      unset($callbacks[$id]);
+    }
   }
-  
-  public static function unsubscribe_all() {
-    self::$events = array();
+
+   /**
+   * @param callback $callback
+   * @return string
+   */
+  public static function getCallbackHash($callback) {
+    if (is_object($callback)) {
+      return spl_object_hash($callback);
+    }
+    return md5(print_r($callback, true));
   }
 
 }
-
