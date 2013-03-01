@@ -38,7 +38,7 @@ PubSub::subscribe('my_event', function($message){
 PubSub::publish('my_event', 'Hello world');  // echo 'Hello world'
 ```
 
-Removing a Single Callback from a PubSub:
+Removing a Single Callback from an Event:
 ---------------------------------------
 PubSub internally creates unique ids for callbacks, so they can be removed
 ```php
@@ -51,7 +51,7 @@ PubSub::unsubscribe('my_event', $callback);
 PubSub::publish('my_event', 'Hello world'); // does nothing
 ```
 
-Removing all Callbacks for a PubSub:
+Removing all Callbacks for an Event:
 ----------------------------------
 ```php
 PubSub::subscribe('my_event', function($message){
@@ -61,7 +61,7 @@ PubSub::unsubscribe('my_event');
 PubSub::publish('my_event', 'Hello world'); // does nothing
 ```
 
-Get Array of Registered Callbacks for a PubSub
+Get Array of Registered Callbacks for an Event
 --------------------------------------------
 ```php
 PubSub::subscribe('my_event', function($message){
@@ -71,4 +71,17 @@ PubSub::subscribe('my_event', function(){
   return false;
 });
 PubSub::subscriptions('my_event'); // returns numeric array with both callbacks, in the order that they would execute
+```
+
+
+Get Array of all Registered Events and their Subscriptions
+--------------------------------------------
+```php
+PubSub::subscribe('my_event', function($message){
+  echo $message;
+});
+PubSub::subscribe('my_event', function(){
+  return false;
+});
+PubSub::events(); // returns associative array, of callbacks, indexed by event name
 ```
