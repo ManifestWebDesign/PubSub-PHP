@@ -32,10 +32,10 @@ PubSub::subscribe('/enqueue_js', function($additional_js = array()) {
 Basic Usage:
 ------------
 ```php
-PubSub::subscribe('my_hook', function($message){
+PubSub::subscribe('my_event', function($message){
   echo $message;
 });
-PubSub::publish('my_hook', 'Hello world');  // echo 'Hello world'
+PubSub::publish('my_event', 'Hello world');  // echo 'Hello world'
 ```
 
 Removing a Single Callback from a PubSub:
@@ -45,30 +45,30 @@ PubSub internally creates unique ids for callbacks, so they can be removed
 $callback = function($message){
   echo $message;
 };
-PubSub::subscribe('my_hook', $callback);
-PubSub::publish('my_hook', 'Hello world');  // echo 'Hello world'
-PubSub::unsubscribe('my_hook', $callback);
-PubSub::publish('my_hook', 'Hello world'); // does nothing
+PubSub::subscribe('my_event', $callback);
+PubSub::publish('my_event', 'Hello world');  // echo 'Hello world'
+PubSub::unsubscribe('my_event', $callback);
+PubSub::publish('my_event', 'Hello world'); // does nothing
 ```
 
 Removing all Callbacks for a PubSub:
 ----------------------------------
 ```php
-PubSub::subscribe('my_hook', function($message){
+PubSub::subscribe('my_event', function($message){
   echo $message;
 });
-PubSub::unsubscribe('my_hook');
-PubSub::publish('my_hook', 'Hello world'); // does nothing
+PubSub::unsubscribe('my_event');
+PubSub::publish('my_event', 'Hello world'); // does nothing
 ```
 
 Get Array of Registered Callbacks for a PubSub
 --------------------------------------------
 ```php
-PubSub::subscribe('my_hook', function($message){
+PubSub::subscribe('my_event', function($message){
   echo $message;
 });
-PubSub::subscribe('my_hook', function(){
+PubSub::subscribe('my_event', function(){
   return false;
 });
-PubSub::subscriptions('my_hook'); // returns numeric array with both callbacks, in the order that they would execute
+PubSub::subscriptions('my_event'); // returns numeric array with both callbacks, in the order that they would execute
 ```
