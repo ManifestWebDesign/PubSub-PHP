@@ -1,4 +1,4 @@
-## PubSub for PHP [![Build Status](https://travis-ci.org/BaylorRae/PubSub-PHP.png?branch=master)](https://travis-ci.org/BaylorRae/PubSub-PHP)
+## PubSub for PHP
 This is an implementation of PubSub for PHP that's designed to have a simple api.
 
 ## Usage
@@ -32,55 +32,56 @@ PubSub::subscribe('/enqueue_js', function($additional_js = array()) {
 Basic Usage:
 ------------
 ```php
-PubSub::subscribe('my_hook', function($message){
+PubSub::subscribe('my_event', function($message){
   echo $message;
 });
-PubSub::publish('my_hook', 'Hello world');  // echo 'Hello world'
+PubSub::publish('my_event', 'Hello world');  // echo 'Hello world'
 ```
 
-Removing a Single Callback from a PubSub:
+Removing a Single Callback from an Event:
 ---------------------------------------
 PubSub internally creates unique ids for callbacks, so they can be removed
 ```php
 $callback = function($message){
   echo $message;
 };
-PubSub::subscribe('my_hook', $callback);
-PubSub::publish('my_hook', 'Hello world');  // echo 'Hello world'
-PubSub::unsubscribe('my_hook', $callback);
-PubSub::publish('my_hook', 'Hello world'); // does nothing
+PubSub::subscribe('my_event', $callback);
+PubSub::publish('my_event', 'Hello world');  // echo 'Hello world'
+PubSub::unsubscribe('my_event', $callback);
+PubSub::publish('my_event', 'Hello world'); // does nothing
 ```
 
-Removing all Callbacks for a PubSub:
+Removing all Callbacks for an Event:
 ----------------------------------
 ```php
-PubSub::subscribe('my_hook', function($message){
+PubSub::subscribe('my_event', function($message){
   echo $message;
 });
-PubSub::unsubscribe('my_hook');
-PubSub::publish('my_hook', 'Hello world'); // does nothing
+PubSub::unsubscribe('my_event');
+PubSub::publish('my_event', 'Hello world'); // does nothing
 ```
 
-Priority and Return False
-----------------------------------
-```php
-PubSub::subscribe('my_hook', function($message){
-  echo $message;
-}, 100); // priority of 100
-PubSub::subscribe('my_hook', function(){
-  return false;
-}, 99);
-PubSub::publish('my_hook', 'Hello world'); // does nothing, because the callback that returned false was executed first
-```
-
-Get Array of Registered Callbacks for a PubSub
+Get Array of Registered Callbacks for an Event
 --------------------------------------------
 ```php
-PubSub::subscribe('my_hook', function($message){
+PubSub::subscribe('my_event', function($message){
   echo $message;
-}, 100); // priority of 100
-PubSub::subscribe('my_hook', function(){
+});
+PubSub::subscribe('my_event', function(){
   return false;
-}, 99);
-PubSub::callbacks('my_hook'); // returns numeric array with both callbacks, in the order that they would execute
+});
+PubSub::subscriptions('my_event'); // returns numeric array with both callbacks, in the order that they would execute
+```
+
+
+Get Array of all Registered Events and their Subscriptions
+--------------------------------------------
+```php
+PubSub::subscribe('my_event', function($message){
+  echo $message;
+});
+PubSub::subscribe('my_event', function(){
+  return false;
+});
+PubSub::events(); // returns associative array, of callbacks, indexed by event name
 ```
