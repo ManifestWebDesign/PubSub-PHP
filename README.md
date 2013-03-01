@@ -66,9 +66,9 @@ Get Array of Registered Callbacks for a PubSub
 ```php
 PubSub::subscribe('my_hook', function($message){
   echo $message;
-}, 100); // priority of 100
+});
 PubSub::subscribe('my_hook', function(){
   return false;
-}, 99);
+});
 PubSub::subscriptions('my_hook'); // returns numeric array with both callbacks, in the order that they would execute
 ```
