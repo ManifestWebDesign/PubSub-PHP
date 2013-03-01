@@ -27,3 +27,60 @@ PubSub::subscribe('/enqueue_js', function($additional_js = array()) {
 </body>
 </html>
 ```
+
+
+Basic Usage:
+------------
+```php
+PubSub::subscribe('my_hook', function($message){
+  echo $message;
+});
+PubSub::publish('my_hook', 'Hello world');  // echo 'Hello world'
+```
+
+Removing a Single Callback from a PubSub:
+---------------------------------------
+PubSub internally creates unique ids for callbacks, so they can be removed
+```php
+$callback = function($message){
+  echo $message;
+};
+PubSub::subscribe('my_hook', $callback);
+PubSub::publish('my_hook', 'Hello world');  // echo 'Hello world'
+PubSub::unsubscribe('my_hook', $callback);
+PubSub::publish('my_hook', 'Hello world'); // does nothing
+```
+
+Removing all Callbacks for a PubSub:
+----------------------------------
+```php
+PubSub::subscribe('my_hook', function($message){
+  echo $message;
+});
+PubSub::unsubscribe('my_hook');
+PubSub::publish('my_hook', 'Hello world'); // does nothing
+```
+
+Priority and Return False
+----------------------------------
+```php
+PubSub::subscribe('my_hook', function($message){
+  echo $message;
+}, 100); // priority of 100
+PubSub::subscribe('my_hook', function(){
+  return false;
+}, 99);
+PubSub::publish('my_hook', 'Hello world'); // does nothing, because the callback that returned false was executed first
+```
+
+Get Array of Registered Callbacks for a PubSub
+--------------------------------------------
+```php
+PubSub::subscribe('my_hook', function($message){
+  echo $message;
+}, 100); // priority of 100
+PubSub::subscribe('my_hook', function(){
+  return false;
+}, 99);
+PubSub::callbacks('my_hook'); // returns numeric array with both callbacks, in the order that they would execute
+```
