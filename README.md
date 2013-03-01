@@ -82,5 +82,5 @@ PubSub::subscribe('my_hook', function($message){
 PubSub::subscribe('my_hook', function(){
   return false;
 }, 99);
-PubSub::callbacks('my_hook'); // returns numeric array with both callbacks, in the order that they would execute
+PubSub::subscriptions('my_hook'); // returns numeric array with both callbacks, in the order that they would execute
 ```
